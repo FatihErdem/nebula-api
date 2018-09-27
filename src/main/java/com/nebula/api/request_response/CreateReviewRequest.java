@@ -26,5 +26,5 @@ public class CreateReviewRequest implements Serializable {
 	private Integer rating;
 
 	@NotEmpty
-	private String comments;
+	private String comment;
 }

@@ -41,13 +41,21 @@ public class ReviewService {
 		review.setReviewerName(request.getReviewerName());
 		review.setEmailAddress(request.getEmailAddress());
 		review.setRating(request.getRating());
-		review.setComment(request.getComments());
+		review.setComment(request.getComment());
 		review.setStatus(ReviewStatus.PENDING);
 
 		return review;
 	}
 
 	private CreateReviewDto mapToCreateReviewDto(Review review) {
-		return new CreateReviewDto(review.getId(), review.getComment());
+
+		CreateReviewDto dto = new CreateReviewDto();
+		dto.setProductId(review.getProductId());
+		dto.setReviewerName(review.getReviewerName());
+		dto.setEmailAddress(review.getEmailAddress());
+		dto.setRating(review.getRating());
+		dto.setComment(review.getComment());
+		dto.setStatus(review.getStatus());
+		return dto;
 	}
 }
