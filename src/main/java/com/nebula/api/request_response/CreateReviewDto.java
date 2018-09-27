@@ -1,16 +1,29 @@
 package com.nebula.api.request_response;
 
+import com.nebula.api.model.ReviewStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class CreateReviewDto {
 
 	private Integer reviewId;
 
+	private Integer productId;
+
 	private String comment;
 
-	public CreateReviewDto(Integer reviewId, String comment) {
-		this.reviewId = reviewId;
-		this.comment = comment;
-	}
+	private String reviewerName;
+
+	private LocalDateTime reviewDate;
+
+	private String emailAddress;
+
+	private Integer rating;
+
+	private ReviewStatus status;
+
 }
