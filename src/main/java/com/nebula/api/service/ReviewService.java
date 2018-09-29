@@ -2,9 +2,8 @@ package com.nebula.api.service;
 
 import com.nebula.api.config.RabbitConfig;
 import com.nebula.api.model.Review;
-import com.nebula.api.model.ReviewStatus;
+import com.nebula.api.model.dto.EmailReviewDto;
 import com.nebula.api.repository.ReviewRepository;
-import com.nebula.api.model.dto.CreateReviewDto;
 import com.nebula.api.request_response.CreateReviewRequest;
 import com.nebula.api.request_response.CreateReviewResponse;
 import lombok.AllArgsConstructor;
@@ -12,6 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -23,10 +23,10 @@ public class ReviewService {
 
 	public CreateReviewResponse create(CreateReviewRequest request) {
 
-		final Review review = mapToReviewEntity(request);
+		final Review review = ReviewMapper.mapToReviewEntity(request);
 		reviewRepository.save(review);
 
-		rabbitTemplate.convertAndSend(RabbitConfig.REVIEW_CREATED_QUEUE, mapToCreateReviewDto(review));
+		rabbitTemplate.convertAndSend(RabbitConfig.REVIEW_CREATED_QUEUE, ReviewMapper.mapToCreateReviewDto(review));
 
 		return new CreateReviewResponse(review.getId());
 	}
@@ -39,28 +39,13 @@ public class ReviewService {
 		return reviewRepository.findAll();
 	}
 
-	private Review mapToReviewEntity(CreateReviewRequest request) {
-		final Review review = new Review();
-		review.setProductId(request.getProductId());
-		review.setReviewerName(request.getReviewerName());
-		review.setEmailAddress(request.getEmailAddress());
-		review.setRating(request.getRating());
-		review.setComment(request.getComment());
-		review.setStatus(ReviewStatus.PENDING);
-
-		return review;
+	public void sendEmail(Review review) {
+		EmailReviewDto emailReviewDto = ReviewMapper.mapToEmailReviewDto(review);
+		rabbitTemplate.convertAndSend(RabbitConfig.EMAIL_QUEUE, emailReviewDto);
 	}
 
-	private CreateReviewDto mapToCreateReviewDto(Review review) {
-
-		CreateReviewDto dto = new CreateReviewDto();
-		dto.setReviewId(review.getId());
-		dto.setProductId(review.getProductId());
-		dto.setReviewerName(review.getReviewerName());
-		dto.setEmailAddress(review.getEmailAddress());
-		dto.setRating(review.getRating());
-		dto.setComment(review.getComment());
-		dto.setStatus(review.getStatus());
-		return dto;
+	public Review getById(Integer id) {
+		Optional<Review> reviewOpt = reviewRepository.findById(id);
+		return reviewOpt.orElse(null);
 	}
 }
