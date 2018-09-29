@@ -23,6 +23,8 @@ public class RabbitConfig {
 
 	private static final String EXCHANGE_REVIEW_UPDATED = "review-updated-exchange";
 
+	public static final String EMAIL_QUEUE = "email-queue";
+
 	@Bean("reviewCreatedQueue")
 	Queue reviewCreatedQueue() {
 

@@ -17,11 +17,13 @@ public class ReviewUpdatedConsumer {
 	private final ReviewService reviewService;
 
 	@RabbitListener(queues = RabbitConfig.REVIEW_UPDATED_QUEUE)
-	public void recievedMessage(UpdateReviewDto dto) {
-		Review review = new Review();
+	public void consumeReviewUpdate(UpdateReviewDto dto) {
+
+		Review review = reviewService.getById(dto.getId());
 		review.setId(dto.getId());
 		review.setStatus(dto.getStatus());
 
 		reviewService.updateStatus(review);
+		reviewService.sendEmail(review);
 	}
 }
