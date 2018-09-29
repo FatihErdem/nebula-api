@@ -13,34 +13,66 @@ public class RabbitConfig {
 
 	public static final String REVIEW_CREATED_QUEUE = "review-created-queue";
 
-	public static final String QUEUE_DEAD_REVIEWS = "dead-review-created-queue";
+	public static final String REVIEW_UPDATED_QUEUE = "review-updated-queue";
 
-	public static final String EXCHANGE_REVIEW_CREATED = "review-created-exchange";
+	private static final String QUEUE_DEAD_CRATED_REVIEWS = "dead-review-created-queue";
 
-	@Bean
-	Queue ordersQueue() {
+	private static final String EXCHANGE_REVIEW_CREATED = "review-created-exchange";
+
+	private static final String QUEUE_DEAD_UPDATED_REVIEWS = "dead-review-updated-queue";
+
+	private static final String EXCHANGE_REVIEW_UPDATED = "review-updated-exchange";
+
+	@Bean("reviewCreatedQueue")
+	Queue reviewCreatedQueue() {
 
 		return QueueBuilder
 				.durable(REVIEW_CREATED_QUEUE)
 				.withArgument("x-dead-letter-exchange", "")
-				.withArgument("x-dead-letter-routing-key", QUEUE_DEAD_REVIEWS)
+				.withArgument("x-dead-letter-routing-key", QUEUE_DEAD_CRATED_REVIEWS)
 				.withArgument("x-message-ttl", 60000)
 				.build();
 	}
 
-	@Bean
-	Queue deadLetterQueue() {
-		return QueueBuilder.durable(QUEUE_DEAD_REVIEWS).build();
+	@Bean("reviewUpdatedQueue")
+	Queue reviewUpdatedQueue() {
+
+		return QueueBuilder
+				.durable(REVIEW_UPDATED_QUEUE)
+				.withArgument("x-dead-letter-exchange", "")
+				.withArgument("x-dead-letter-routing-key", QUEUE_DEAD_UPDATED_REVIEWS)
+				.withArgument("x-message-ttl", 60000)
+				.build();
 	}
 
-	@Bean
-	Exchange ordersExchange() {
+	@Bean("deadLetterQueueReviewCrated")
+	Queue deadLetterQueueReviewCrated() {
+		return QueueBuilder.durable(QUEUE_DEAD_CRATED_REVIEWS).build();
+	}
+
+	@Bean("reviewCreatedExchange")
+	Exchange reviewCreatedExchange() {
 		return ExchangeBuilder.topicExchange(EXCHANGE_REVIEW_CREATED).build();
 	}
 
-	@Bean
-	Binding binding(Queue ordersQueue, TopicExchange ordersExchange) {
-		return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(REVIEW_CREATED_QUEUE);
+	@Bean("reviewCreatedBinding")
+	Binding reviewCreatedBinding(Queue reviewCreatedQueue, TopicExchange reviewCreatedExchange) {
+		return BindingBuilder.bind(reviewCreatedQueue).to(reviewCreatedExchange).with(EXCHANGE_REVIEW_CREATED);
+	}
+
+	@Bean("deadLetterQueueReviewUpdated")
+	Queue deadLetterQueueReviewUpdated() {
+		return QueueBuilder.durable(QUEUE_DEAD_UPDATED_REVIEWS).build();
+	}
+
+	@Bean("reviewUpdatedExchange")
+	Exchange reviewUpdatedExchange() {
+		return ExchangeBuilder.topicExchange(EXCHANGE_REVIEW_UPDATED).build();
+	}
+
+	@Bean("reviewUpdatedBinding")
+	Binding reviewUpdatedBinding(Queue reviewUpdatedQueue, TopicExchange reviewUpdatedExchange) {
+		return BindingBuilder.bind(reviewUpdatedQueue).to(reviewUpdatedExchange).with(EXCHANGE_REVIEW_UPDATED);
 	}
 
 	@Bean

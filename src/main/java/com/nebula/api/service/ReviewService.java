@@ -4,7 +4,7 @@ import com.nebula.api.config.RabbitConfig;
 import com.nebula.api.model.Review;
 import com.nebula.api.model.ReviewStatus;
 import com.nebula.api.repository.ReviewRepository;
-import com.nebula.api.request_response.CreateReviewDto;
+import com.nebula.api.model.dto.CreateReviewDto;
 import com.nebula.api.request_response.CreateReviewRequest;
 import com.nebula.api.request_response.CreateReviewResponse;
 import lombok.AllArgsConstructor;
@@ -31,6 +31,10 @@ public class ReviewService {
 		return new CreateReviewResponse(review.getId());
 	}
 
+	public void updateStatus(Review review) {
+		reviewRepository.updateStatus(review.getId(), review.getStatus());
+	}
+
 	public List<Review> getAll() {
 		return reviewRepository.findAll();
 	}
@@ -50,6 +54,7 @@ public class ReviewService {
 	private CreateReviewDto mapToCreateReviewDto(Review review) {
 
 		CreateReviewDto dto = new CreateReviewDto();
+		dto.setReviewId(review.getId());
 		dto.setProductId(review.getProductId());
 		dto.setReviewerName(review.getReviewerName());
 		dto.setEmailAddress(review.getEmailAddress());
