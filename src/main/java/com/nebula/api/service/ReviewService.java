@@ -1,13 +1,14 @@
 package com.nebula.api.service;
 
-import com.nebula.api.config.RabbitConfig;
+import com.nebula.api.listener.ReviewCreateEvent;
 import com.nebula.api.model.Review;
-import com.nebula.api.model.dto.EmailReviewDto;
+import com.nebula.api.model.dto.CreateReviewDto;
 import com.nebula.api.repository.ReviewRepository;
 import com.nebula.api.request_response.CreateReviewRequest;
 import com.nebula.api.request_response.CreateReviewResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,12 +22,15 @@ public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
 
+	private final ApplicationEventPublisher eventPublisher;
+
 	public CreateReviewResponse create(CreateReviewRequest request) {
 
 		final Review review = ReviewMapper.mapToReviewEntity(request);
 		reviewRepository.save(review);
 
-		rabbitTemplate.convertAndSend(RabbitConfig.REVIEW_CREATED_QUEUE, ReviewMapper.mapToCreateReviewDto(review));
+		final CreateReviewDto createReviewDto = ReviewMapper.mapToCreateReviewDto(review);
+		eventPublisher.publishEvent(new ReviewCreateEvent(this, createReviewDto));
 
 		return new CreateReviewResponse(review.getId());
 	}
@@ -37,11 +41,6 @@ public class ReviewService {
 
 	public List<Review> getAll() {
 		return reviewRepository.findAll();
-	}
-
-	public void sendEmail(Review review) {
-		EmailReviewDto emailReviewDto = ReviewMapper.mapToEmailReviewDto(review);
-		rabbitTemplate.convertAndSend(RabbitConfig.EMAIL_QUEUE, emailReviewDto);
 	}
 
 	public Review getById(Integer id) {
