@@ -7,7 +7,7 @@ import com.nebula.api.model.dto.CreateReviewDto;
 import com.nebula.api.model.dto.EmailReviewDto;
 import com.nebula.api.request_response.CreateReviewRequest;
 
-class ReviewMapper {
+public class ReviewMapper {
 
 	private ReviewMapper() {
 	}
@@ -37,7 +37,7 @@ class ReviewMapper {
 		return dto;
 	}
 
-	static EmailReviewDto mapToEmailReviewDto(Review review) {
+	public static EmailReviewDto mapToEmailReviewDto(Review review) {
 		EmailReviewDto dto = new EmailReviewDto();
 		dto.setProductId(review.getProductId());
 		dto.setReviewerName(review.getReviewerName());
